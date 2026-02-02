@@ -25,23 +25,30 @@
 
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{modernruler}[2026/01/30, Version 1.3.5--undev]
+\ProvidesPackage{modernruler}[2026/02/02, Version 1.3.5]
 
 %%% parameters
-\unless\ifdefined\zw
-   \newdimen\zw
-   \zw=1em
-\fi
-\unless\ifdefined\ltjgetparameter
-   \newcommand{\ltjgetparameter}[1]{4}
-\fi
+\ExplSyntaxOn
+\cs_if_exist:NF \zw
+  {
+    \dim_new:N \zw
+    \dim_set:Nn \zw { 1em }
+  }
+
+\cs_if_exist:NF \ltjgetparameter
+  {
+    \cs_new:Npn \ltjgetparameter #1 { 4 }
+  }
+\ExplSyntaxOff
+%%%
 
 %%% basical settings
 \RequirePackage{kvoptions, pgfkeys} 
 \RequirePackage{varwidth}
 \RequirePackage[most]{tcolorbox}
+%%%
 
-%%% kv（undernoteの方）
+%%% keyval package options for \undernote
 \SetupKeyvalOptions{%
   family=undernote,%
   prefix=undernote@%
@@ -59,83 +66,75 @@
 \ProcessKeyvalOptions*
 
 \def\notesize@internal@undernote{\undernote@notesize}                     
-   %%% 注釈部分の文字サイズ
+   % 注釈部分の文字サイズ
 \def\notepos@internal@undernote{\undernote@notepos}                        
-   %%% 注釈へと伸ばす縦線の長さの最小値
+   % 注釈へと伸ばす縦線の長さの最小値
 \def\noteshift@internal@undernote{\undernote@noteshift}                    
-   %%% 注釈を下にずらす場合の1段階分の移動量
+   % 注釈を下にずらす場合の1段階分の移動量
 \def\noterulethickness@internal@undernote{\undernote@noterulethickness}    
-   %%% \note で用いる罫線の太さ
+   % 注釈線の太さ
 \def\noterulehshift@internal@undernote{\undernote@noterulehshift}          
-   %%% 注釈へと伸ばす縦線の位置（注釈をつける語句につけた下線の左端から
-   %%% \noterulehshift@internal@undernote だけ右にずれた位置に縦線を置く）
+   % 注釈へと伸ばす縦線の位置
+   % （注釈をつける語句につけた下線の左端から\noterulehshift@internal@undernote だけ右にずれた位置に縦線を置く）
 \def\noterulehsize@internal@undernote{\undernote@noterulehsize}           
-   %%% 注釈へと伸ばす横線の長さ
+   % 注釈へと伸ばす横線の長さ
 \def\notesep@internal@undernote{\undernote@notesep}                        
-   %%% 前にある注釈が次の注釈の縦線から \notesep@internal@undernote 以内に近づくようなら，
-   %%% 前にある注釈を下にずらす（「2em」のように文字サイズに依存する
-   %%% 指定をした場合は，\notesize@internal@undernote（の，現在使用中のフォント）における値）
+   % 前にある注釈が次の注釈の縦線から \notesep@internal@undernote 以内に近づくようなら，その値だけ前にある注釈を下にずらす
 \def\noteoverhang@internal@undernote{\undernote@noteoverhang}                                 
-   %%% parbox に入れるタイプ（スターをつけた時）
-   %%% どの程度後ろに注釈部分を張り出させるか
+   % どの程度後ろに注釈部分を張り出させるか
 \def\noteparstyle@internal@undernote{\undernote@noteparstyle}                                     
-   %%% 注釈部分を
-   %%% 1 と 2 以外: 囲みなし 1: 実線で囲う 2:点線で囲う
+   % 注釈部分を 
+   % 1と2以外: 囲みなし 1: 実線で囲う 2:点線で囲う
 \def\notelinecolor@internal@undernote{\undernote@notelinecolor}   
-   %%% 注釈線の色の指定
+   % 注釈線の色の指定
+%%%
 
 
-% command
-\NewDocumentCommand{\SetUNoteSize}{O{\footnotesize}}{%
-  \def\notesize@internal@undernote{#1}%
-}                 
-\NewDocumentCommand{\SetUNoteRuleThickness}{O{.4pt}}{%
-  \def\noterulethickness@internal@undernote{#1}%
+%%% setting commands for \undernote
+\pgfkeys{
+  /KKTeX/unote/.is family,
+  /KKTeX/unote,
+  notesize/.store in          = \notesize@internal@undernote,
+  notepos/.store in           = \notepos@internal@undernote,
+  noteshift/.store in         = \noteshift@internal@undernote,
+  noterulethickness/.store in = \noterulethickness@internal@undernote,
+  noterulehshift/.store in    = \noterulehshift@internal@undernote,
+  noterulehsize/.store in     = \noterulehsize@internal@undernote,
+  notesep/.store in           = \notesep@internal@undernote,
+  noteoverhang/.store in      = \noteoverhang@internal@undernote,
+  notelinecolor/.store in     = \notelinecolor@internal@undernote,
+  noteparstyle/.code          = {
+    \def\noteparstyle@internal@undernote{#1}
+    \ifnum#1=1
+       \let\wrap@undernote\wrap@undernote@styleA
+       \let\wrap@undernote@par\wrap@undernote@par@styleA
+       \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo]}
+       \def\vlines@undernote@par{%
+          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt]%
+          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt]%
+       }
+    \else\ifnum#1=2
+       \let\wrap@undernote\wrap@undernote@styleB
+       \let\wrap@undernote@par\wrap@undernote@par@styleB
+       \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true]}
+       \def\vlines@undernote@par{%
+          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt ,dash=true]%
+          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true]%
+       }
+    \else
+       \let\wrap@undernote\wrap@undernote@styleC
+       \let\wrap@undernote@par\wrap@undernote@par@styleC
+       \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo]}
+       \def\vlines@undernote@par{%
+          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt]%
+          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt]%
+       }
+    \fi\fi
+  }
 }
-\NewDocumentCommand{\SetUNoteRuleHShift}{O{1.5mm}}{%
-  \def\noterulehshift@internal@undernote{#1}%
-}
-\NewDocumentCommand{\SetUNoteRuleHSize}{O{1.5mm}}{%
-  \def\noterulehsize@internal@undernote{#1}%
-}
-\NewDocumentCommand{\SetUNotePos}{O{3mm}}{%
-  \def\notepos@internal@undernote{#1}%
-}
-\NewDocumentCommand{\SetUNoteShift}{O{1mm}}{%
-  \def\noteshift@internal@undernote{#1}%
-}
-\NewDocumentCommand{\SetUNoteSep}{O{2em}}{%
-  \def\notesep@internal@undernote{#1}%
-}
-\NewDocumentCommand{\SetUNoteOverHang}{O{3em}}{%
-  \def\noteoverhang@internal@undernote{#1}%
-}
-\NewDocumentCommand{\SetUNoteParstyle}{O{0}}{%
-  \ifnum#1=1%
-   \let\wrap@undernote\wrap@undernote@styleA%
-   \let\wrap@undernote@par\wrap@undernote@par@styleA%
-   \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo]}%
-   \def\vlines@undernote@par{%
-      \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt]%
-      \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt]%
-   }%
-   \else\ifnum#1=2
-      \let\wrap@undernote\wrap@undernote@styleB%
-      \let\wrap@undernote@par\wrap@undernote@par@styleB%
-      \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true]}%
-      \def\vlines@undernote@par{%
-         \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt ,dash=true]%
-         \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true]%
-      }%
-      \else
-         \let\wrap@undernote\wrap@undernote@styleC%
-         \let\wrap@undernote@par\wrap@undernote@par@styleC%
-         \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo]}%
-         \def\vlines@undernote@par{%
-            \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt]%
-            \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt]%
-         }%
-   \fi\fi
+
+\NewDocumentCommand{\SetUNote}{O{}}{%
+  \pgfkeys{/KKTeX/unote, #1}%
 }
 %%%
 
@@ -280,7 +279,7 @@
   sharp corners,boxsep=0mm,
   left=.3mm,right=.3mm,top=0.3mm,bottom=0.3mm,
   colback=white,colframe=white,
-  enhanced,before={\hspace*{-.1722\zw}},
+  enhanced,before={\hspace*{-.172\zw}},
   borderline={\noterulethickness@internal@undernote}{0mm}{solid,\notelinecolor@internal@undernote},
   #1
 }{#2}
@@ -289,7 +288,7 @@
   sharp corners,boxsep=0mm,
   left=.3mm,right=.3mm,top=0.3mm,bottom=0.3mm,
   colback=white,colframe=white,
-  enhanced,before={\hspace*{-.1722\zw}},
+  enhanced,before={\hspace*{-.172\zw}},
   borderline={\noterulethickness@internal@undernote}{0mm}{dashed,\notelinecolor@internal@undernote},
   #1
 }{#2}
@@ -298,7 +297,7 @@
   sharp corners,boxsep=-.5mm,
   left=.8mm,right=.8mm,top=0.3mm,bottom=0.3mm,
   colback=white,colframe=white,
-  enhanced,before={\hspace*{-.1722\zw}},
+  enhanced,before={\hspace*{-.172\zw}},
   #1
 }{#2}
 
@@ -308,19 +307,19 @@
 {%
    \FramedBox@undernote{%
       \parbox[t]{\dimexpr\undernote@textlen@tempo - \noterulehsize@internal@undernote - \noterulehshift@internal@undernote + \noteoverhang@internal@undernote\relax}%
-      {\setlength{\baselineskip}{.2153\zw}#1}}%
+      {\setlength{\baselineskip}{.215\zw}#1}}%
 }}
 \NewDocumentCommand{\wrap@undernote@par@styleB}{ +m }{%
 {%
    \DashedBox@undernote{%
       \parbox[t]{\dimexpr\undernote@textlen@tempo - \noterulehsize@internal@undernote - \noterulehshift@internal@undernote + \noteoverhang@internal@undernote\relax}%
-      {\setlength{\baselineskip}{.2153\zw}#1}}%
+      {\setlength{\baselineskip}{.215\zw}#1}}%
 }}
 \NewDocumentCommand{\wrap@undernote@par@styleC}{ +m }{%
 {%
    \NoframeBox@undernote{%
       \parbox[t]{\dimexpr\undernote@textlen@tempo - \noterulehsize@internal@undernote - \noterulehshift@internal@undernote + \noteoverhang@internal@undernote\relax}%
-      {\setlength{\baselineskip}{.2153\zw}#1}}%
+      {\setlength{\baselineskip}{.215\zw}#1}}%
 }}
 \NewDocumentCommand{\wrap@undernote@styleA}{ +m }{{\FramedBox@undernote{#1}}}
 \NewDocumentCommand{\wrap@undernote@styleB}{ +m }{{\DashedBox@undernote{#1}}}
@@ -399,6 +398,8 @@
    \edef\@tempa{\cl@@ckpt}%
    \expandafter\endgroup%
    \expandafter\def\expandafter\@note@restore@counters\expandafter{\@tempa}%
+      % グループが閉じる前の\@tempaを
+      % \@note@restore@countersとして復元可能な形にしている
 }
 
 % 数式モードの場合への対応
@@ -421,49 +422,48 @@
 % 注釈の内部実装
 \long\def\@text@undernote#1#2#3{%
    \hbox{%
-      \def\@UNDATA@vsize{#1}% \undernoteの第２引数
+      \def\@UNDATA@vsize{#1}% 
+         % \undernoteの第2引数
+         % 指定ありor無しで処理を分岐させる
       \ifx\@UNDATA@vsize\@empty% 
-            % 指定なしパターン
-            % \undernoteの第２引数が空かそうでないか
+         % 指定なしパターン
          \expandafter\ifx\csname @UNDATAS@\the\c@undernote@id\endcsname\relax%
-            % １回目のコンパイルではまだ空
-            % →\relaxと比較してスルー
             \def\@UNDATA@vsize{1}%
          \else%
-            % ２回目のコンパイルでは自動設定されている
-            % →\@UNDATAS@12のようなデータを\@UNDATA@vsizeに格納
             \edef\@UNDATA@vsize{\csname @UNDATAS@\the\c@undernote@id\endcsname}%
          \fi%
       \fi%
-      \setbox\@undernote@maintext\hbox{#2\mruletv[height=.8\zw, width=0pt, color=\notelinecolor@internal@undernote]}% \undernoteの第３引数
-      \setbox\@undernote@subtext\hbox{\notesize@internal@undernote #3}% \undernoteの第４引数
+      \setbox\@undernote@maintext\hbox{#2\mruletv[height=.8\zw, width=0pt, color=\notelinecolor@internal@undernote]}
+         % \undernoteの第３引数
+      \setbox\@undernote@subtext\hbox{\notesize@internal@undernote #3}
+         % \undernoteの第４引数
       \vtop{%
          \box\@undernote@maintext% 
          \begingroup%
             \notesize@internal@undernote% 
-            \if@filesw% .auxへの書き出しokかどうか
+            \if@filesw%
                \dimen@\wd\@undernote@subtext%
                \advance\dimen@\notesep@internal@undernote\relax%
-                     % 注釈の長さと、sepの長さを足す
-                     % 水平方向にどれだけスペースをとっているか
                \edef\@tempa{%
                   \write\@auxout{% .auxへの書き出し
                      \string\undernotedata@internal{\the\c@undernote@id}%
                         {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
                         {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
-                        {\noexpand\the\c@page}% これで.auxに
-                                             % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
-                                             % {<height of the note>}{<depth of the note>}{<page>}
-                                             % が書き込まれる
+                        {\noexpand\the\c@page}%
+                           % これで.auxに
+                           % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
+                           % {<height of the note>}{<depth of the note>}{<page>}
+                           % が書き込まれる
                   }%
                }%
                \@tempa%
             \else%
-               \write16{}% 書き出し不可の場合、何もしない
+               \write16{}%
             \fi%
          \endgroup%
          \vskip1pt%
-         \hline@undernote@par% アンダーライン
+         \hline@undernote@par% 
+            %アンダーライン
          \hbox{\notesize@internal@undernote% 
                % サイズ指定
             \hskip\noterulehshift@internal@undernote% 
@@ -471,8 +471,7 @@
             \count@\@UNDATA@vsize\relax \advance\count@\m@ne% 
                % \count@ = 現在の段 - 1 
             \dimen@\noteshift@internal@undernote\relax \multiply\dimen@\count@%
-               % \count@*\dimen@ i.e. 
-               % ノートの縦幅だけ下へ
+               % \count@*\dimen@ i.e. ノートの縦幅だけ下へ
             \advance\dimen@\notepos@internal@undernote\relax% 
                % 縦線の長さの分さらに下へ
             \vlines@undernote@par%
@@ -493,27 +492,22 @@
 \global\@UNDATA@max -\@M
 \global\let\@UNDATA@idlist\@empty
 \let\@UNDATA@elt\relax
-\def\undernotedata@internal#1#2#3#4#5#6#7{%%% #1: id, #2: xpos, #3: ypos, #4: width of the note,
-                                          %%% #5: height of the note, #6: depth of the note, #7: page
+\def\undernotedata@internal#1#2#3#4#5#6#7{%
+   % #1: id, #2: xpos, #3: ypos, #4: width of the note,
+   % #5: height of the note, #6: depth of the note, #7: page
    \@ifundefined{@UNDATA@#1}%
       {\@tempcnta\@UNDATA@max \advance\@tempcnta\@ne%
-         % 連番チェック
-       \ifnum\@tempcnta=#1\relax%
-          \global\@UNDATA@max\@tempcnta%
-       \else%
-          \ifnum\@UNDATA@max<\z@\else % 
-               % 最初はmaxが-10000なので
-               % 必ずこの分岐に入り
-               % idlistが作られる
-             \xdef\@UNDATA@idlist{\@UNDATA@idlist\@UNDATA@elt{\the\@UNDATA@min}{\the\@UNDATA@max}}%
-               % １回目では\relaxが入ってるので
-               % 残って２回目へ
-          \fi%
-          \global\@UNDATA@min=#1\relax%
-          \global\@UNDATA@max\@UNDATA@min%
-       \fi}%
+         \ifnum\@tempcnta=#1\relax%
+            \global\@UNDATA@max\@tempcnta%
+         \else%
+            \ifnum\@UNDATA@max<\z@\else % 
+               \xdef\@UNDATA@idlist{\@UNDATA@idlist\@UNDATA@elt{\the\@UNDATA@min}{\the\@UNDATA@max}}%
+            \fi%
+            \global\@UNDATA@min=#1\relax%
+            \global\@UNDATA@max\@UNDATA@min%
+         \fi}%
       {\gdef\@multiplelabels{\@latex@warning@no@line{There were multiply-defined labels}}%
-       \@latex@warning@no@line{Note ID `#1' multiply appeared}%
+         \@latex@warning@no@line{Note ID `#1' multiply appeared}%
       }%
    \global\@namedef{@UNDATA@#1}{{#2}{#3}{#4}{#5}{#6}{#7}}%
       % データを.aux用に格納
