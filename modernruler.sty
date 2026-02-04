@@ -25,21 +25,21 @@
 
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{modernruler}[2026/02/02, Version 1.3.5]
+\ProvidesExplPackage
+  {modernruler}
+  {2026/02/02}{Version 1.4.0}{`modernruler` provides enhanced ruler commands}
 
 %%% parameters
-\ExplSyntaxOn
 \cs_if_exist:NF \zw
-  {
-    \dim_new:N \zw
-    \dim_set:Nn \zw { 1em }
-  }
+   {
+      \dim_new:N \zw
+      \dim_set:Nn \zw { 1em }
+   }
 
 \cs_if_exist:NF \ltjgetparameter
-  {
-    \cs_new:Npn \ltjgetparameter #1 { 4 }
-  }
-\ExplSyntaxOff
+   {
+      \cs_new:Npn \ltjgetparameter #1 { 4 }
+   }
 %%%
 
 
@@ -94,17 +94,17 @@
 
 %%% setting commands for \undernote
 \pgfkeys{
-  /KKTeX/unote/.is family,
+  /KKTeX/unote/.is~family,
   /KKTeX/unote,
-  notesize/.store in          = \notesize@internal@undernote,
-  notepos/.store in           = \notepos@internal@undernote,
-  noteshift/.store in         = \noteshift@internal@undernote,
-  noterulethickness/.store in = \noterulethickness@internal@undernote,
-  noterulehshift/.store in    = \noterulehshift@internal@undernote,
-  noterulehsize/.store in     = \noterulehsize@internal@undernote,
-  notesep/.store in           = \notesep@internal@undernote,
-  noteoverhang/.store in      = \noteoverhang@internal@undernote,
-  notelinecolor/.store in     = \notelinecolor@internal@undernote,
+  notesize/.store~in          = \notesize@internal@undernote,
+  notepos/.store~in           = \notepos@internal@undernote,
+  noteshift/.store~in         = \noteshift@internal@undernote,
+  noterulethickness/.store~in = \noterulethickness@internal@undernote,
+  noterulehshift/.store~in    = \noterulehshift@internal@undernote,
+  noterulehsize/.store~in     = \noterulehsize@internal@undernote,
+  notesep/.store~in           = \notesep@internal@undernote,
+  noteoverhang/.store~in      = \noteoverhang@internal@undernote,
+  notelinecolor/.store~in     = \notelinecolor@internal@undernote,
   noteparstyle/.code          = {
     \def\noteparstyle@internal@undernote{#1}
     \ifnum#1=1
@@ -142,7 +142,6 @@
 
 
 %%% modern rule commands
-\ExplSyntaxOn
 
 % 変数の宣言
 \dim_new:N  \l_mrule_width_dim
@@ -273,13 +272,12 @@
    }
    \group_end:
 }
-\ExplSyntaxOff
 %%%
 
 %%% undernote
 \DeclareTotalTCBox{\FramedBox@undernote}{ O{} +m }{%
-  on line,arc=0pt,
-  sharp corners,boxsep=0mm,
+  on~line,arc=0pt,
+  sharp~corners,boxsep=0mm,
   left=.3mm,right=.3mm,top=0.3mm,bottom=0.3mm,
   colback=white,colframe=white,
   enhanced,before={\hspace*{-.172\zw}},
@@ -287,8 +285,8 @@
   #1
 }{#2}
 \DeclareTotalTCBox{\DashedBox@undernote}{ O{} +m }{%
-  on line,arc=0pt,
-  sharp corners,boxsep=0mm,
+  on~line,arc=0pt,
+  sharp~corners,boxsep=0mm,
   left=.3mm,right=.3mm,top=0.3mm,bottom=0.3mm,
   colback=white,colframe=white,
   enhanced,before={\hspace*{-.172\zw}},
@@ -296,8 +294,8 @@
   #1
 }{#2}
 \DeclareTotalTCBox{\NoframeBox@undernote}{ O{} +m }{%
-  on line,arc=0pt,
-  sharp corners,boxsep=-.5mm,
+  on~line,arc=0pt,
+  sharp~corners,boxsep=-.5mm,
   left=.8mm,right=.8mm,top=0.3mm,bottom=0.3mm,
   colback=white,colframe=white,
   enhanced,before={\hspace*{-.172\zw}},
