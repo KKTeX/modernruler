@@ -57,7 +57,9 @@
 }
 \DeclareStringOption[\footnotesize]{notesize}
 \DeclareStringOption[3mm]{notepos}
-\DeclareStringOption[1mm]{noteshift}
+\DeclareStringOption[2.5mm]{noteshift}
+   % noteparstyle=0なら2.5mm推奨
+   % noteparstyle=1 or 2なら4mm推奨
 \DeclareStringOption[.4pt]{noterulethickness}
 \DeclareStringOption[1.5mm]{noterulehshift}
 \DeclareStringOption[1.5mm]{noterulehsize}
@@ -426,17 +428,24 @@
 }
 
 % 注釈の内部実装
+
+\prg_new_conditional:Nnn \__modernruler_if_file_write: { p, T, F, TF }
+  {
+    \legacy_if:nTF { @filesw }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
 \long\def\@text@undernote#1#2#3{%
    \hbox{%
       \def\@UNDATA@vsize{#1}% 
          % \undernoteの第2引数
          % 指定ありor無しで処理を分岐させる
-      \tl_if_empty:cTF {@UNDATA@vsize} 
+      \tl_if_empty:cTF { @UNDATA@vsize } 
          {
             \tl_if_eq:cNTF 
                { @UNDATAS@\the\c@undernote@id } \relax 
                { 
-                  % \def\@UNDATA@vsize{1} 
                   \tl_set:cn { @UNDATA@vsize } { 1 }
                }
                { 
@@ -444,33 +453,57 @@
                }
          }{ \relax }
 
-      \setbox\@undernote@maintext\hbox{#2\mruletv[height=.8\zw, width=0pt, color=\notelinecolor@internal@undernote]}
+      \hbox_set:Nn \@undernote@maintext { #2\mruletv[height=.8\zw, width=0pt, color=\notelinecolor@internal@undernote] }
          % \undernoteの第３引数
-      \setbox\@undernote@subtext\hbox{\notesize@internal@undernote #3}
+      \hbox_set:Nn \@undernote@subtext { \notesize@internal@undernote #3 }
          % \undernoteの第４引数
+
       \vtop{%
-         \box\@undernote@maintext% 
+         \box_use:N \@undernote@maintext% 
          \begingroup%
             \notesize@internal@undernote% 
-            \if@filesw%
-               \dimen@\wd\@undernote@subtext%
-               \advance\dimen@\notesep@internal@undernote\relax%
-               \edef\@tempa{%
-                  \write\@auxout{% .auxへの書き出し
-                     \string\undernotedata@internal{\the\c@undernote@id}%
-                        {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
-                        {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
-                        {\noexpand\the\c@page}%
-                           % これで.auxに
-                           % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
-                           % {<height of the note>}{<depth of the note>}{<page>}
-                           % が書き込まれる
-                  }%
-               }%
-               \@tempa%
-            \else%
-               \write16{}%
-            \fi%
+
+            % \if@filesw%
+            %    \dim_set:cn { dimen@ } { \box_wd:c { @undernote@subtext } }
+            %    \dim_add:cn { dimen@ } { \notesep@internal@undernote }
+            %    \edef\@tempa{%
+            %       \write\@auxout{% .auxへの書き出し
+            %          \string\undernotedata@internal{\the\c@undernote@id}%
+            %             {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
+            %             {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
+            %             {\noexpand\the\c@page}%
+            %                % これで.auxに
+            %                % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
+            %                % {<height of the note>}{<depth of the note>}{<page>}
+            %                % が書き込まれる
+            %       }%
+            %    }%
+            %    \@tempa%
+            % \else%
+            %    \write16{}%
+            % \fi%
+
+            \__modernruler_if_file_write:TF 
+               {
+                  \dim_set:cn { dimen@ } { \box_wd:c { @undernote@subtext } }
+                  \dim_add:cn { dimen@ } { \notesep@internal@undernote }
+
+                  \iow_now:cx { @auxout }
+                     {
+                        \token_to_str:N \undernotedata@internal 
+                        { \int_use:N \c@undernote@id }
+                        { \exp_not:N \the \exp_not:N \lastxpos } 
+                        { \exp_not:N \the \exp_not:N \lastypos }
+                        { \dim_to_decimal:n { \dim_use:c { dimen@ } } }
+                        { \dim_to_decimal:n { \box_ht:c { @undernote@subtext } } }
+                        { \dim_to_decimal:n { \box_dp:c { @undernote@subtext } } }
+                        { \exp_not:N \the \exp_not:N \c@page }
+                     }
+               }
+               {
+                  \iow_term:n { }
+               }
+
          \endgroup%
          \vskip1pt%
          \hline@undernote@par% 
