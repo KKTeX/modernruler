@@ -392,22 +392,17 @@
 }
 
 % 名称カウンタ
-\def\@note@save@conters{
-   % except for page number
-   \tl_clear:N \l_tmpa_tl
-   
-   \clist_map_inline:Nn \cl@@ckpt
-   {
+\def\@note@save@conters {
+  \group_begin:
+    \cs_set:Npn \@elt ##1 {
       \str_if_eq:nnF { ##1 } { page }
-         {
-            \tl_put_right:Nx \l_tmpa_tl
-               {
-                  \unexpanded { \setcounter { ##1 } }
-                  { \int_use:c { c@ ##1 } }
-               }
-         }
-   }
-   \cs_gset_eq:NN \kkv_restore_counters: \l_tmpa_tl
+        { \setcounter { ##1 } { \int_use:c { c@ ##1 } } }
+    }
+    \tl_set:Nx \l_tmpa_tl { \cl@@ckpt }
+    \exp_args:NNNV \group_end:
+    \tl_set:Nn \l_tmpa_tl \l_tmpa_tl
+    
+  \cs_gset_eq:NN \@note@restore@counters \l_tmpa_tl
 }
 
 % 数式モードの場合への対応
