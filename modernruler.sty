@@ -57,9 +57,7 @@
 }
 \DeclareStringOption[\footnotesize]{notesize}
 \DeclareStringOption[3mm]{notepos}
-\DeclareStringOption[2.5mm]{noteshift}
-   % noteparstyle=0なら2.5mm推奨
-   % noteparstyle=1 or 2なら4mm推奨
+\DeclareStringOption[4mm]{noteshift}
 \DeclareStringOption[.4pt]{noterulethickness}
 \DeclareStringOption[1.5mm]{noterulehshift}
 \DeclareStringOption[1.5mm]{noterulehsize}
@@ -393,15 +391,17 @@
 
 % 名称カウンタ
 \def\@note@save@conters{
-  \group_begin:
-    \cs_set:Npn \@elt ##1 {
-      \str_if_eq:nnF { ##1 } { page }
-        { \setcounter { ##1 } { \int_use:c { c@ ##1 } } }
-    }
-    \tl_set:Nx \l_tmpa_tl { \cl@@ckpt }
-    \exp_args:NNNV \group_end:
-    \tl_set:Nn \l_tmpa_tl \l_tmpa_tl
-    
+   \group_begin:
+      \cs_set:Npn \@elt ##1 {
+         \str_if_eq:nnF { ##1 } { page }
+         { 
+            \int_gset:cn { c@ ##1 } { \int_use:c { c@ ##1 } } 
+         }
+      }
+      \tl_set:Nx \l_tmpa_tl { \cl@@ckpt }
+   \exp_args:NNNV \group_end: \tl_set:Nn \l_tmpa_tl \l_tmpa_tl
+      % グループ外への持ち出し
+  
   \cs_gset_eq:NN \@note@restore@counters \l_tmpa_tl
 }
 
@@ -423,7 +423,6 @@
 }
 
 % 注釈の内部実装
-
 \prg_new_conditional:Nnn \__modernruler_if_file_write: { p, T, F, TF }
   {
     \legacy_if:nTF { @filesw }
@@ -436,53 +435,50 @@
       \def\@UNDATA@vsize{#1}% 
          % \undernoteの第2引数
          % 指定ありor無しで処理を分岐させる
-      \tl_if_empty:cTF { @UNDATA@vsize } 
+      \tl_if_empty:cT { @UNDATA@vsize } 
          {
-            \tl_if_eq:cNTF 
+            \cs_if_eq:cNTF
                { @UNDATAS@\the\c@undernote@id } \relax 
                { 
-                  \tl_set:cn { @UNDATA@vsize } { 1 }
+                  \def\@UNDATA@vsize{1}
                }
                { 
-                  \tl_set:cx { @UNDATA@vsize }{ \csname @UNDATAS@\the\c@undernote@id\endcsname } 
+                  \edef\@UNDATA@vsize{\csname @UNDATAS@\the\c@undernote@id\endcsname}
                }
-         }{ \relax }
-
+         }
       \hbox_set:Nn \@undernote@maintext { #2\mruletv[height=.8\zw, width=0pt, color=\notelinecolor@internal@undernote] }
          % \undernoteの第３引数
       \hbox_set:Nn \@undernote@subtext { \notesize@internal@undernote #3 }
          % \undernoteの第４引数
-
       \vtop{%
          \box_use:N \@undernote@maintext% 
-
          \group_begin:
-
             \notesize@internal@undernote% 
-
             \__modernruler_if_file_write:TF 
                {
-                  \dim_set:cn { dimen@ } { \box_wd:c { @undernote@subtext } }
-                  \dim_add:cn { dimen@ } { \notesep@internal@undernote }
-
-                  \iow_now:cx { @auxout }
-                     {
-                        \token_to_str:N \undernotedata@internal 
-                        { \int_use:N \c@undernote@id }
-                        { \exp_not:N \the \exp_not:N \lastxpos } 
-                        { \exp_not:N \the \exp_not:N \lastypos }
-                        { \dim_to_decimal:n { \dim_use:c { dimen@ } } }
-                        { \dim_to_decimal:n { \box_ht:c { @undernote@subtext } } }
-                        { \dim_to_decimal:n { \box_dp:c { @undernote@subtext } } }
-                        { \exp_not:N \the \exp_not:N \c@page }
-                     }
+                  \dimen@\wd\@undernote@subtext%
+                  \advance\dimen@\notesep@internal@undernote\relax%
+                  \edef\@tempa{%
+                     % ここの書き換えは慎重に
+                     % .auxファイルから出たときにexpl3の構文が通用しない
+                     % という可能性があり、下手に書き換えを行うとまずいかも
+                     \write\@auxout{%
+                        \string\undernotedata@internal{\the\c@undernote@id}%
+                           {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
+                           {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
+                           {\noexpand\the\c@page}%
+                              % これで.auxに
+                              % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
+                              % {<height of the note>}{<depth of the note>}{<page>}
+                              % が書き込まれる
+                     }%
+                  }%
+                  \@tempa%
                }
                {
                   \iow_term:n { }
                }
-
          \group_end:
-
          \skip_vertical:n { 1pt }
          \hline@undernote@par% 
             %アンダーライン
@@ -505,29 +501,42 @@
    }%
 }
 
-\newcount\@UNDATA@min
-\newcount\@UNDATA@max
-\global\@UNDATA@max -\@M
-\global\let\@UNDATA@idlist\@empty
-\let\@UNDATA@elt\relax
+\int_new:N \@UNDATA@min
+\int_new:N \@UNDATA@max
+\int_gset:Nn \@UNDATA@max { -10000 }
+\tl_gclear:N \@UNDATA@idlist
+\cs_set_eq:NN \@UNDATA@elt \relax
+\msg_new:nnn { modernruler } { multiple-labels } { There ~ were ~ multiply-defined ~ labels }
+
 \def\undernotedata@internal#1#2#3#4#5#6#7{%
    % #1: id, #2: xpos, #3: ypos, #4: width of the note,
    % #5: height of the note, #6: depth of the note, #7: page
-   \@ifundefined{@UNDATA@#1}%
-      {\@tempcnta\@UNDATA@max \advance\@tempcnta\@ne%
-         \ifnum\@tempcnta=#1\relax%
-            \global\@UNDATA@max\@tempcnta%
-         \else%
-            \ifnum\@UNDATA@max<\z@\else % 
-               \xdef\@UNDATA@idlist{\@UNDATA@idlist\@UNDATA@elt{\the\@UNDATA@min}{\the\@UNDATA@max}}%
-            \fi%
-            \global\@UNDATA@min=#1\relax%
-            \global\@UNDATA@max\@UNDATA@min%
-         \fi}%
-      {\gdef\@multiplelabels{\@latex@warning@no@line{There were multiply-defined labels}}%
-         \@latex@warning@no@line{Note ID `#1' multiply appeared}%
-      }%
-   \global\@namedef{@UNDATA@#1}{{#2}{#3}{#4}{#5}{#6}{#7}}%
+   \cs_if_exist:cTF { @UNDATA@ #1 }
+      {
+         \msg_warning:nn { modernruler } { multiple-labels }
+      }
+      {
+         \int_set:Nn \@tempcnta { \@UNDATA@max + 1 }
+
+         \int_compare:nNnTF { \@tempcnta } = { #1 }
+         {
+            \int_gset:Nn \@UNDATA@max { \@tempcnta }
+         }
+         {
+            \int_compare:nNnF { \@UNDATA@max } < { 0 }
+            {
+               \tl_gput_right:Nx \@UNDATA@idlist
+                  {
+                     \exp_not:N \@UNDATA@elt
+                     { \int_use:N \@UNDATA@min }
+                     { \int_use:N \@UNDATA@max }
+                  }
+            }
+            \int_gset:Nn \@UNDATA@min { #1 }
+            \int_gset:Nn \@UNDATA@max { \@UNDATA@min }
+         }
+      }
+   \cs_gset:cpn { @UNDATA@ #1 } { {#2}{#3}{#4}{#5}{#6}{#7} }
       % データを.aux用に格納
 }
 
