@@ -460,28 +460,10 @@
 
       \vtop{%
          \box_use:N \@undernote@maintext% 
-         \begingroup%
-            \notesize@internal@undernote% 
 
-            % \if@filesw%
-            %    \dim_set:cn { dimen@ } { \box_wd:c { @undernote@subtext } }
-            %    \dim_add:cn { dimen@ } { \notesep@internal@undernote }
-            %    \edef\@tempa{%
-            %       \write\@auxout{% .auxへの書き出し
-            %          \string\undernotedata@internal{\the\c@undernote@id}%
-            %             {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
-            %             {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
-            %             {\noexpand\the\c@page}%
-            %                % これで.auxに
-            %                % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
-            %                % {<height of the note>}{<depth of the note>}{<page>}
-            %                % が書き込まれる
-            %       }%
-            %    }%
-            %    \@tempa%
-            % \else%
-            %    \write16{}%
-            % \fi%
+         \group_begin:
+
+            \notesize@internal@undernote% 
 
             \__modernruler_if_file_write:TF 
                {
@@ -504,29 +486,26 @@
                   \iow_term:n { }
                }
 
-         \endgroup%
-         \vskip1pt%
+         \group_end:
+
+         \skip_vertical:n { 1pt }
          \hline@undernote@par% 
             %アンダーライン
          \hbox{\notesize@internal@undernote% 
                % サイズ指定
-            \hskip\noterulehshift@internal@undernote% 
+            \skip_horizontal:n { \noterulehshift@internal@undernote }
                % 横に少しずらす
-            \count@\@UNDATA@vsize\relax \advance\count@\m@ne% 
+            \int_set:Nn \count@ { \@UNDATA@vsize - 1 }
                % \count@ = 現在の段 - 1 
-            \dimen@\noteshift@internal@undernote\relax \multiply\dimen@\count@%
+            \dim_set:Nn \dimen@ { \noteshift@internal@undernote * \count@ }
                % \count@*\dimen@ i.e. ノートの縦幅だけ下へ
-            \advance\dimen@\notepos@internal@undernote\relax% 
+            \dim_add:Nn \dimen@ { \notepos@internal@undernote }
                % 縦線の長さの分さらに下へ
             \vlines@undernote@par%
                % 縦線を出力
-            \hbox to \z@ {\lower.38\zw% 
-                  % 注釈テキストを.38\zw下へ
-               \box\@undernote@subtext\hss%
-                  % 注釈配置
-            }%
+            \box_move_down:nn { 0.38 \zw } { \hbox_to_zero:n { \box_use:N \@undernote@subtext \hss } }
          }%
-         \vskip .3\zw%
+         \skip_vertical:n { .3\zw }
       }%
    }%
 }
