@@ -390,17 +390,22 @@
 }
 
 % 名称カウンタ
-\def\@note@save@conters{%
-   \begingroup%
-   \def\@elt##1{%
-      \expandafter\ifx\csname c@##1\endcsname\c@page\else
-         \csname c@##1\endcsname\the\csname c@##1\endcsname\relax
-      \fi}%
-   \edef\@tempa{\cl@@ckpt}%
-   \expandafter\endgroup%
-   \expandafter\def\expandafter\@note@restore@counters\expandafter{\@tempa}%
-      % グループが閉じる前の\@tempaを
-      % \@note@restore@countersとして復元可能な形にしている
+\def\@note@save@conters{
+   % except for page number
+   \tl_clear:N \l_tmpa_tl
+   
+   \clist_map_inline:Nn \cl@@ckpt
+   {
+      \str_if_eq:nnF { ##1 } { page }
+         {
+            \tl_put_right:Nx \l_tmpa_tl
+               {
+                  \unexpanded { \setcounter { ##1 } }
+                  { \int_use:c { c@ ##1 } }
+               }
+         }
+   }
+   \cs_gset_eq:NN \kkv_restore_counters: \l_tmpa_tl
 }
 
 % 数式モードの場合への対応
@@ -426,14 +431,19 @@
       \def\@UNDATA@vsize{#1}% 
          % \undernoteの第2引数
          % 指定ありor無しで処理を分岐させる
-      \ifx\@UNDATA@vsize\@empty% 
-         % 指定なしパターン
-         \expandafter\ifx\csname @UNDATAS@\the\c@undernote@id\endcsname\relax%
-            \def\@UNDATA@vsize{1}%
-         \else%
-            \edef\@UNDATA@vsize{\csname @UNDATAS@\the\c@undernote@id\endcsname}%
-         \fi%
-      \fi%
+      \tl_if_empty:cTF {@UNDATA@vsize} 
+         {
+            \tl_if_eq:cNTF 
+               { @UNDATAS@\the\c@undernote@id } \relax 
+               { 
+                  % \def\@UNDATA@vsize{1} 
+                  \tl_set:cn { @UNDATA@vsize } { 1 }
+               }
+               { 
+                  \tl_set:cx { @UNDATA@vsize }{ \csname @UNDATAS@\the\c@undernote@id\endcsname } 
+               }
+         }{ \relax }
+
       \setbox\@undernote@maintext\hbox{#2\mruletv[height=.8\zw, width=0pt, color=\notelinecolor@internal@undernote]}
          % \undernoteの第３引数
       \setbox\@undernote@subtext\hbox{\notesize@internal@undernote #3}
