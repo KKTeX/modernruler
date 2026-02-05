@@ -27,7 +27,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage
   {modernruler}
-  {2026/02/06}{Version 2.0.0}{`modernruler` provides enhanced ruler commands}
+  {2026/02/06}{Version 2.1.1}{`modernruler` provides enhanced ruler commands}
 
 %%% parameters
 \cs_if_exist:NF \zw
@@ -58,7 +58,7 @@
 \DeclareStringOption[\footnotesize]{notesize}
 \DeclareStringOption[3mm]{notepos}
 \DeclareStringOption[4mm]{noteshift}
-\DeclareStringOption[.4pt]{noterulethickness}
+\DeclareStringOption[.07\zw]{noterulethickness}
 \DeclareStringOption[1.5mm]{noterulehshift}
 \DeclareStringOption[1.5mm]{noterulehsize}
 \DeclareStringOption[0em]{notesep}
@@ -300,29 +300,29 @@
 
 %%% undernote
 \DeclareTotalTCBox{\FramedBox@undernote}{ O{} +m }{%
-  on~line,arc=0pt,
-  sharp~corners,boxsep=0mm,
-  left=.3mm,right=.3mm,top=0.3mm,bottom=0.3mm,
-  colback=white,colframe=white,
-  enhanced,before={\hspace*{-.172\zw}},
-  borderline={\noterulethickness@internal@undernote}{0mm}{solid,\notelinecolor@internal@undernote},
+  on~line, arc=0pt,
+  sharp~corners, boxsep=-.5mm+.25\zw,
+  left=.3mm, right=.3mm, top=0.3mm, bottom=0.3mm,
+  colback=white, colframe=white, boxrule=0pt,
+  enhanced, before={\hspace*{.25\zw}\hspace{-.5mm}},
+  borderline={\noterulethickness@internal@undernote}{-.25\zw+.5mm}{solid, \notelinecolor@internal@undernote},
   #1
 }{#2}
 \DeclareTotalTCBox{\DashedBox@undernote}{ O{} +m }{%
-  on~line,arc=0pt,
-  sharp~corners,boxsep=0mm,
-  left=.3mm,right=.3mm,top=0.3mm,bottom=0.3mm,
-  colback=white,colframe=white,
-  enhanced,before={\hspace*{-.172\zw}},
-  borderline={\noterulethickness@internal@undernote}{0mm}{dashed,\notelinecolor@internal@undernote},
+  on~line, arc=0pt,
+  sharp~corners, boxsep=-.5mm+.25\zw,
+  left=.3mm, right=.3mm, top=0.3mm, bottom=0.3mm,
+  colback=white, colframe=white, boxrule=0pt,
+  enhanced, before={\hspace*{.25}\hspace{-.5mm}},
+  borderline={\noterulethickness@internal@undernote}{-.25\zw+.5mm}{dashed, \notelinecolor@internal@undernote},
   #1
 }{#2}
 \DeclareTotalTCBox{\NoframeBox@undernote}{ O{} +m }{%
-  on~line,arc=0pt,
-  sharp~corners,boxsep=-.5mm,
-  left=.8mm,right=.8mm,top=0.3mm,bottom=0.3mm,
-  colback=white,colframe=white,
-  enhanced,before={\hspace*{-.172\zw}},
+  on~line, arc=0pt,
+  sharp~corners, boxsep=-.5mm,
+  left=.8mm, right=.8mm, top=0.3mm, bottom=0.3mm,
+  colback=white, colframe=white, boxrule=0pt,
+  enhanced, before={\hspace*{-.172\zw}},
   #1
 }{#2}
 
@@ -354,7 +354,9 @@
 \ifnum\noteparstyle@internal@undernote=1
    \let\wrap@undernote\wrap@undernote@styleA
    \let\wrap@undernote@par\wrap@undernote@par@styleA
-   \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]}%
+   \def\hline@undernote@par{%
+      \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
+   }%
    \def\vlines@undernote@par{%
       \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
       \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
@@ -362,7 +364,9 @@
 \else\ifnum\noteparstyle@internal@undernote=2
    \let\wrap@undernote\wrap@undernote@styleB
    \let\wrap@undernote@par\wrap@undernote@par@styleB
-   \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true, color=\notelinecolor@internal@undernote]}%
+   \def\hline@undernote@par{%
+      \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true, color=\notelinecolor@internal@undernote]%
+   }%
    \def\vlines@undernote@par{%
       \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt ,dash=true, color=\notelinecolor@internal@undernote]%
       \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true, color=\notelinecolor@internal@undernote]%
@@ -370,7 +374,9 @@
    \else
       \let\wrap@undernote\wrap@undernote@styleC
       \let\wrap@undernote@par\wrap@undernote@par@styleC
-      \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]}%
+      \def\hline@undernote@par{%
+         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
+      }%
       \def\vlines@undernote@par{%
          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
@@ -512,9 +518,8 @@
                % 横に少しずらす
             \int_set:Nn \count@ { \@UNDATA@vsize - 1 }
                % \count@ = 現在の段 - 1 
-            \dim_set:Nn \dimen@ { \noteshift@internal@undernote * \count@ }
+            \dim_set:Nn \dimen@ { \noteshift@internal@undernote * \count@ + \notepos@internal@undernote }
                % \count@*\dimen@ i.e. ノートの縦幅だけ下へ
-            \dim_add:Nn \dimen@ { \notepos@internal@undernote }
                % 縦線の長さの分さらに下へ
             \vlines@undernote@par%
                % 縦線を出力

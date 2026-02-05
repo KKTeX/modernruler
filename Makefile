@@ -7,18 +7,18 @@ RC     = .latexmkrc
 
 
 # ----- main ------
-.PHONY: clean distclean pvc zip builddoc buildtest
+.PHONY: clean distclean zip doc test0 test1
 
 # compile
-builddoc:
+doc:
 	latexmk -r $(RC) $(DOC_TARGET).tex
 	$(MAKE) clean
 
 # compile
-buildtest0:
+test0:
 	latexmk -r $(RC) $(TEST_TARGET_0).tex
 	$(MAKE) clean
-buildtest1:
+test1:
 	latexmk -r $(RC) $(TEST_TARGET_1).tex
 	$(MAKE) clean
 
@@ -36,7 +36,7 @@ styFILENAME = modernruler
 ZIP_DIR = $(PACKAGE)
 
 # ----- zip generation -----
-zip: distclean builddoc
+zip: distclean doc
 	mkdir -p $(ZIP_DIR)
 	cp $(styFILENAME).sty $(ZIP_DIR)
 	cp README.md $(ZIP_DIR)

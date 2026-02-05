@@ -11,7 +11,7 @@
 `modernruler` provides enhanced ruler commands, including `\mruleth`, `\mruletv`, and `\undernote`. These commands are designed to be more flexible than standard LaTeX rules, supporting key-value options for styling and full compatibility with vertical writing modes.<br>
 `modernruler` は、標準の罫線コマンドを拡張した `\mruleth`、`\mruletv`、および `\undernote` を提供します。色やスタイルの指定をキー値オプションで行える柔軟性を持ち、縦書き環境にも完全に対応しています。
 
-- **Version**: 2.0.0
+- **Version**: 2.1.1
 - **Date**: 2026-02-06
 - **Author**: Kosei Kawaguchi (a.k.a. KKTeX)
 - **License**: MIT
@@ -45,8 +45,8 @@ responsibility of the author.
   - `\mruleth` と `\mruletv` は、色やスタイルをオプションで簡単にカスタマイズできます。
 
 - **Annotations with \undernote / 注釈機能（\undernote）**
-  - Attach short annotations beneath words or phrases, connected by a clean ruled line.
-  - 本文の語句の下に、罫線でつながれた短い注釈を配置することができます。
+  - This is the main function provided by this package. Attach short annotations beneath words or phrases, connected by a clean ruled line.
+  - このパッケージの主たる機能です。本文の語句の下に、罫線でつながれた短い注釈を配置することができます。
 
 - **Vertical Writing Support / 縦書き環境に対応**
   - Fully compatible with vertical layouts (e.g., `\documentclass[tate]{jlreq}`).
@@ -58,7 +58,6 @@ responsibility of the author.
 
 This package only supports LuaLaTeX.<br>
 本パッケージはLuaLaTeXのみをサポートしています。
-
 
 **Dependencies / 依存パッケージ:**
 - `kvoptions`, `varwidth`, `tcolorbox`
