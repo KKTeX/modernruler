@@ -61,7 +61,7 @@
 \DeclareStringOption[.4pt]{noterulethickness}
 \DeclareStringOption[1.5mm]{noterulehshift}
 \DeclareStringOption[1.5mm]{noterulehsize}
-\DeclareStringOption[2em]{notesep}
+\DeclareStringOption[0em]{notesep}
 \DeclareStringOption[3em]{noteoverhang}
 \DeclareStringOption[0]{noteparstyle}
 \DeclareStringOption[black]{notelinecolor}
@@ -651,9 +651,9 @@
          \int_sub:Nn \count@ { 1 }
          \@check@undernotedata@split\count@
          \dim_set:Nn \dimen@ { 
+            % 注釈の右端の物理的限界位置
             \@thisx sp + \@thiswd sp 
             + \noterulehsize@internal@undernote
-            + 1pt
          }
          \cs_set_eq:NN \@currht \@thisht
          \int_set:Nn \@tempcntb { 1 }
@@ -665,7 +665,11 @@
                \dim_compare:nNnT { \@thisx sp } < { \dimen@ }
                   {
                      \dim_set_eq:NN \@tempdima \noteshift@internal@undernote
-                     \dim_set:Nn \@tempdimb { \@thisdp sp + \@currht sp + \@thismaindp sp + \lineskip }
+                     \dim_set:Nn \@tempdimb { 
+                        \@thisdp sp + \@currht sp + 
+                        \@thismaindp sp  + 
+                        \lineskip 
+                     }
                      \int_set:Nn \l_tmpa_int 
                         { 
                            \fp_eval:n { floor( \dim_to_fp:n { \@tempdimb } / \dim_to_fp:n { \@tempdima } ) } 
