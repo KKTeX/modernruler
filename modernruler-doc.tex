@@ -79,7 +79,7 @@
 
 \title{\texttt{modernruler} Package Documentation}
 \author{Kosei Kawaguchi a.k.a. KKTeX}
-\date{Version 1.3.1 (2026/01/26)}
+\date{Version 2.0.0 (2026/02/06)}
 
 \begin{document}
 \begin{titlepage}
@@ -322,13 +322,14 @@ Of course, this package provides some package options for adjustments.\bigskip
     \textbf{Key} & \textbf{Type} & \textbf{Default} & \textbf{Description} \\ \midrule
     notesize          & tl   & \verb|\footnotesize|& Font size of the note text \\
     notepos           & dim  & 3mm           & Minimum vertical length of the line to the note \\
-    noteshift         & dim  & 1mm           & Vertical shift amount per level for overlapping notes \\
+    noteshift         & dim  & 4mm           & Vertical shift amount per level for overlapping notes \\
     noterulethickness & dim  & .4pt          & Thickness of the rule used in the note \\
     noterulehshift    & dim  & 1.5mm         & Horizontal offset of the vertical line from the underline start \\
     noterulehsize     & dim  & 1.5mm         & Length of the horizontal line extending to the note \\
-    notesep           & dim  & 2em           & Minimum horizontal distance to prevent note overlap \\
+    notesep           & dim  & 0em           & Minimum horizontal distance to prevent note overlap \\
     noteoverhang      & dim  & 3em           & Extension length of the note parbox (starred version) \\
-    parstyle          & int  & 0             & Border style (0: none, 1: solid, 2: dashed) \\
+    noteparstyle      & int  & 0             & Border style (0: none, 1: solid, 2: dashed) \\
+    notelinecolor     & color & black        & Color of the the underline and the vertical line \\
     \bottomrule
   \end{tabular}
 \end{center}\bigskip
@@ -337,32 +338,33 @@ Of course, this package provides some package options for adjustments.\bigskip
 
 % When you want to change some settings in the middle of the document, you can use the following commands:
 
-% \begin{center}
-%   \begin{tabular}{llll}
-%     \toprule
-%     \textbf{Key (Command)} & \textbf{Type} & \textbf{Default} & \textbf{Description} \\ \midrule
-%     \verb|\SetUNoteSize|          & tl   & \verb|\footnotesize| & Sets the font size of the note \\
-%     \verb|\SetUNoteRuleThickness| & dim  & .4pt                 & Sets the thickness of the note rules \\
-%     \verb|\SetUNoteRuleHShift|    & dim  & 1.5mm                & Sets the horizontal offset of the vertical rule \\
-%     \verb|\SetUNoteRuleHSize|     & dim  & 1.5mm                & Sets the length of the horizontal rule \\
-%     \verb|\SetUNotePos|           & dim  & 3mm                  & Sets the minimum vertical line length \\
-%     \verb|\SetUNoteShift|         & dim  & 1mm                  & Sets the vertical shift amount per level \\
-%     \verb|\SetUNoteSep|           & dim  & 2em                  & Sets the minimum horizontal separation between notes \\
-%     \verb|\SetUNoteOverHang|      & dim  & 3em                  & Sets the overhang length for parbox notes \\
-%     \verb|\SetUNoteParstyle|      & int  & 0                    & Updates the border style and drawing logic \\
-%     \bottomrule
-%   \end{tabular}
-% \end{center}\bigskip
-
 \subsubsection{Additional Description}
 You can use the command in mathmode.
 
 \begin{SourceCode}{Intput}{TeX}
-  \[\undernote{x + y}{In the equation envriomnemt.} = \undernote{\frac{a}{b}}{No problem.}\]
+  \[
+    \undernote {%
+      a + b
+    }{In the equation envriomnemt.}
+    -
+    \undernote*{%
+      x^5 + \int_{c}^{\frac{d}{e}}\sum_{k=1}^{n} {}_n\mathrm{C}_k x^k
+    }{Even the argument includes an expression with large depth, they doesn't overlap the other texts.} 
+    = \undernote{\frac{a}{b+\frac{x}{6}}}{No problem.}
+  \]
 \end{SourceCode}
 
 \begin{OutPut}{Output}
-  \[\undernote{x + y}{In the equation envriomnemt.} = \undernote{\frac{a}{b}}{No problem.}\]
+  \[
+    \undernote {%
+      a + b
+    }{In the equation envriomnemt.}
+    -
+    \undernote*{%
+      x^5 + \int_{c}^{\frac{d}{e}}\sum_{k=1}^{n} {}_n\mathrm{C}_k x^k
+    }{Even the argument includes an expression with large depth, they doesn't overlap the other texts.} 
+    = \undernote{\frac{a}{b+\frac{x}{6}}}{No problem.}
+  \]
 \end{OutPut}
 
 \section{License}
@@ -372,5 +374,10 @@ Released under the MIT License.
 \begin{itemize}
   \item \textbf{v1.0.0--1.1.0} --- Initial public release, and add a fallback for \verb|\zw| and \verb|\ltjgetparameter|.
   \item \textbf{v1.3.1 (2026/01/26)} --- Fixed a bug which occurs when \verb|\undernote| command is used in mathmode. The bug was caused my misreplacement of \verb|\@elt|.
+  \item \textbf{v2.0.0 (2026/02/06)} --- In this update, I made changes in the following two points:
+    \begin{itemize}
+      \item Fixed a bug where the arguments of the \verb|\undernote| with large depth caused text overlap. 
+      \item Modernized the internal implementation by migrating from TeX primitives to the expl3 framework.
+    \end{itemize}
 \end{itemize}
 \end{document}

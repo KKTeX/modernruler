@@ -27,7 +27,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage
   {modernruler}
-  {2026/02/02}{Version 1.4.0}{`modernruler` provides enhanced ruler commands}
+  {2026/02/06}{Version 2.0.0}{`modernruler` provides enhanced ruler commands}
 
 %%% parameters
 \cs_if_exist:NF \zw
@@ -650,11 +650,12 @@
       {
          \int_sub:Nn \count@ { 1 }
          \@check@undernotedata@split\count@
-         \dim_set:Nn \dimen@ { 
-            % 注釈の右端の物理的限界位置
-            \@thisx sp + \@thiswd sp 
-            + \noterulehsize@internal@undernote
-         }
+         \dim_set:Nn \dimen@ 
+            { 
+               % 注釈の右端の物理的限界位置
+               \@thisx sp + \@thiswd sp 
+               + \noterulehsize@internal@undernote
+            }
          \cs_set_eq:NN \@currht \@thisht
          \int_set:Nn \@tempcntb { 1 }
          \int_set:Nn \@tempcnta { \count@ }
@@ -665,16 +666,19 @@
                \dim_compare:nNnT { \@thisx sp } < { \dimen@ }
                   {
                      \dim_set_eq:NN \@tempdima \noteshift@internal@undernote
-                     \dim_set:Nn \@tempdimb { 
-                        \@thisdp sp + \@currht sp + 
-                        \@thismaindp sp  + 
-                        \lineskip 
-                     }
-                     \int_set:Nn \l_tmpa_int 
+                     \dim_set:Nn \@tempdimb 
                         { 
-                           \fp_eval:n { floor( \dim_to_fp:n { \@tempdimb } / \dim_to_fp:n { \@tempdima } ) } 
+                           \@thisdp sp + \@currht sp + 
+                           \lineskip +
+                           % メインテキストの深さを考慮
+                           \@thismaindp sp 
                         }
-                     \int_incr:N \l_tmpa_int
+                     \int_set:Nn \l_tmpa_int 
+                        {  
+                           % 段数に比率で変換
+                           % ただし重なりがあった場合には必ず1段以上下げる
+                           \fp_eval:n { floor( \dim_to_fp:n { \@tempdimb } / \dim_to_fp:n { \@tempdima } ) } + 1
+                        }
                      \int_add:Nn \l_tmpa_int { \use:c { @UNDATAS@ \the \@tempcnta } }
                      \int_set:Nn \@tempcntb { \int_max:nn { \@tempcntb } { \l_tmpa_int } }
                   }
