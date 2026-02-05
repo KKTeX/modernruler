@@ -466,10 +466,10 @@
                         \string\undernotedata@internal{\the\c@undernote@id}%
                            {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
                            {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
-                           {\noexpand\the\c@page}%
+                           {\noexpand\the\c@page}{\number\dp\@undernote@maintext}%
                               % これで.auxに
                               % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
-                              % {<height of the note>}{<depth of the note>}{<page>}
+                              % {<height of the note>}{<depth of the note>}{<page>}{<depth of the maintext>}
                               % が書き込まれる
                      }%
                   }%
@@ -508,9 +508,7 @@
 \cs_set_eq:NN \@UNDATA@elt \relax
 \msg_new:nnn { modernruler } { multiple-labels } { There ~ were ~ multiply-defined ~ labels }
 
-\def\undernotedata@internal#1#2#3#4#5#6#7{%
-   % #1: id, #2: xpos, #3: ypos, #4: width of the note,
-   % #5: height of the note, #6: depth of the note, #7: page
+\def\undernotedata@internal#1#2#3#4#5#6#7#8{%
    \cs_if_exist:cTF { @UNDATA@ #1 }
       {
          \msg_warning:nn { modernruler } { multiple-labels }
@@ -536,15 +534,15 @@
             \int_gset:Nn \@UNDATA@max { \@UNDATA@min }
          }
       }
-   \cs_gset:cpn { @UNDATA@ #1 } { {#2}{#3}{#4}{#5}{#6}{#7} }
+   \cs_gset:cpn { @UNDATA@ #1 } { {#2}{#3}{#4}{#5}{#6}{#7}{#8} }
       % データを.aux用に格納
 }
 
-\cs_set:Npn \@undernotedata #1#2#3#4#5#6#7
+\cs_set:Npn \@undernotedata #1#2#3#4#5#6#7#8
    {
       \str_if_eq:eeTF 
          { \cs_if_exist_use:c { @UNDATA@ #1 } } 
-         { {#2}{#3}{#4}{#5}{#6}{#7} }
+         { {#2}{#3}{#4}{#5}{#6}{#7}{#8} }
          { }
          {
             \legacy_if_set_true:n { @tempswa }
@@ -634,13 +632,14 @@
   \expandafter\expandafter\expandafter\@check@undernotedata@split@\csname @UNDATA@\number#1\endcsname 000000\@nnil%
 }
 
-\def\@check@undernotedata@split@#1#2#3#4#5#6#7\@nnil{
+\def\@check@undernotedata@split@#1#2#3#4#5#6#7#8\@nnil{
    \tl_set:Nn \@thisx { #1 }
    \tl_set:Nn \@thisy { #2 }
    \tl_set:Nn \@thiswd { #3 }
    \tl_set:Nn \@thisht { #4 }
    \tl_set:Nn \@thisdp { #5 }
    \tl_set:Nn \@thispage { #6 }
+   \tl_set:Nn \@thismaindp { #7 }
 }
 
 \def\@check@undernotedata@elt#1#2{%
@@ -666,7 +665,7 @@
                \dim_compare:nNnT { \@thisx sp } < { \dimen@ }
                   {
                      \dim_set_eq:NN \@tempdima \noteshift@internal@undernote
-                     \dim_set:Nn \@tempdimb { \@thisdp sp + \@currht sp + \lineskip }
+                     \dim_set:Nn \@tempdimb { \@thisdp sp + \@currht sp + \@thismaindp sp + \lineskip }
                      \int_set:Nn \l_tmpa_int 
                         { 
                            \fp_eval:n { floor( \dim_to_fp:n { \@tempdimb } / \dim_to_fp:n { \@tempdima } ) } 
