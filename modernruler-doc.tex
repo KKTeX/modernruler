@@ -4,7 +4,7 @@
 \usepackage{luwa-ul, KKluaverb}
 \usepackage[most]{tcolorbox}
 \usepackage{luatexja-ruby,lltjext}
-\usepackage[noteoverhang=7em]{modernruler}
+\usepackage{modernruler}
 
 % You can omit these font settings.
 \makeatletter
@@ -90,7 +90,7 @@
 \newpage
 
 \section{Outline}
-This package provides modern hrule (\verb|\mruleth|), vrule (\verb|\mruletv|), and \verb|\undernote| internally uses the two commands.
+This package provides modern hrule (\KKverb|\mruleth|), vrule (\KKverb|\mruletv|), and \undernote*{\KKverb|\undernote|}{Used like this!\\ It is the main function provided by this package.} internally uses the two commands.
 
 \begin{SourceCode}{Intput}{TeX}
   % normal rule
@@ -260,7 +260,7 @@ This commands provides underlined \undernote{annotation}{Like this.}. There is s
 
 \begin{SourceCode}{Intput}{TeX}
   % grammar
-  \undernote<star option>[<number of lines to shift the note downward>]{<the target phrase>}{<annotation>}[<style>]
+  \undernote<star option>[<number of lines to shift the note downward>]{<the target phrase>}{<annotation>}
 
   % example
   In this single paragraph, we deliberately place many annotated terms to
@@ -317,7 +317,7 @@ Regarding the second argument, ``number of lines to shift the note downward'' is
 Of course, this package provides some package options for adjustments.\bigskip
 
 \begin{center}
-  \begin{tabular}{llll}
+  \begin{tabular}{lllp{.4\linewidth}}
     \toprule
     \textbf{Key} & \textbf{Type} & \textbf{Default} & \textbf{Description} \\ \midrule
     notesize          & tl   & \verb|\footnotesize|& Font size of the note text \\
@@ -327,18 +327,51 @@ Of course, this package provides some package options for adjustments.\bigskip
     noterulehshift    & dim  & 1.5mm         & Horizontal offset of the vertical line from the underline start \\
     noterulehsize     & dim  & 1.5mm         & Length of the horizontal line extending to the note \\
     notesep           & dim  & 0em           & Minimum horizontal distance to prevent note overlap \\
-    noteoverhang      & dim  & 3em           & Extension length of the note parbox (starred version) \\
+    noteoverhang      & dim  & 5em           & Extension length of the note parbox (starred version) \\
     noteparstyle      & int  & 0             & Border style (0: none, 1: solid, 2: dashed) \\
     notelinecolor     & color & black        & Color of the the underline and the vertical line \\
     \bottomrule
   \end{tabular}
 \end{center}\bigskip
 
-%%% MUST CHANGE THE DESCRIPTION!!!
+When you want to change some settings in the middle of the document, you can use \verb|\SetUNote|. 
+It takes a keyvalue-style options like this:
 
-% When you want to change some settings in the middle of the document, you can use the following commands:
+\begin{SourceCode}{Intput}{TeX}
+  \SetUNote[noteparstyle=1, notelinecolor=blue]
+
+  LaTeX is a \undernote{versatile}{Abundant package that can be used for free.} typesetting system \undernote*{that excels at producing high-quality documents}{I think LaTeX is the most flexibly customizable typesetting software.}, especially those containing complex mathematical formulas or technical structures. 
+\end{SourceCode}
+
+
+\begin{OutPut}{Output}
+  \SetUNote[noteparstyle=1, notelinecolor=blue]
+
+  LaTeX is a \undernote{versatile}{Abundant package that can be used for free.} typesetting system \undernote*{that excels at producing high-quality documents}{I think LaTeX is the most flexibly customizable typesetting software.}, especially those containing complex mathematical formulas or technical structures. 
+\end{OutPut}
+
+These are all the keys provided for it.\bigskip
+
+\begin{center}
+  \begin{tabular}{lllp{.4\linewidth}}
+    \toprule
+    \textbf{Key} & \textbf{Type} & \textbf{Default} & \textbf{Description} \\ \midrule
+    \texttt{notesize}          & tl   & \verb|\footnotesize| & Font size of the note text. \\
+    \texttt{notepos}           & dim  & ---           & Minimum vertical length of the line connecting to the note. \\
+    \texttt{noteshift}         & dim  & ---           & Vertical shift amount per level for overlapping notes. \\
+    \texttt{noterulethickness} & dim  & ---           & Thickness of the rules used in the note structure. \\
+    \texttt{noterulehshift}    & dim  & ---           & Horizontal offset of the vertical line from the start of the underline. \\
+    \texttt{noterulehsize}     & dim  & ---           & Length of the horizontal line extending towards the note. \\
+    \texttt{notesep}           & dim  & ---           & Minimum horizontal distance to prevent overlap between notes. \\
+    \texttt{noteoverhang}      & dim  & ---           & Extra horizontal extension for the note's parbox (used in starred version). \\
+    \texttt{noteparstyle}      & int  & 0             & Border style for the note (0: none, 1: solid, 2: dashed). \\
+    \texttt{notelinecolor}     & color & black        & Color of the underline and the connected vertical lines. \\
+    \bottomrule
+  \end{tabular}
+\end{center}
 
 \subsubsection{Additional Description}
+
 You can use the command in mathmode.
 
 \begin{SourceCode}{Intput}{TeX}
@@ -348,7 +381,7 @@ You can use the command in mathmode.
     }{In the equation envriomnemt.}
     -
     \undernote*{%
-      x^5 + \int_{c}^{\frac{d}{e}}\sum_{k=1}^{n} {}_n\mathrm{C}_k x^k
+      x^5 + 4x^3 + \int_{c}^{\frac{d}{e}}\sum_{k=1}^{n} {}_n\mathrm{C}_k x^k + 12
     }{Even the argument includes an expression with large depth, they doesn't overlap the other texts.} 
     = \undernote{\frac{a}{b+\frac{x}{6}}}{No problem.}
   \]
@@ -361,7 +394,7 @@ You can use the command in mathmode.
     }{In the equation envriomnemt.}
     -
     \undernote*{%
-      x^5 + \int_{c}^{\frac{d}{e}}\sum_{k=1}^{n} {}_n\mathrm{C}_k x^k
+      x^5 + 4x^3 + \int_{c}^{\frac{d}{e}}\sum_{k=1}^{n} {}_n\mathrm{C}_k x^k + 12
     }{Even the argument includes an expression with large depth, they doesn't overlap the other texts.} 
     = \undernote{\frac{a}{b+\frac{x}{6}}}{No problem.}
   \]

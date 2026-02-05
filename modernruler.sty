@@ -62,7 +62,7 @@
 \DeclareStringOption[1.5mm]{noterulehshift}
 \DeclareStringOption[1.5mm]{noterulehsize}
 \DeclareStringOption[0em]{notesep}
-\DeclareStringOption[3em]{noteoverhang}
+\DeclareStringOption[5em]{noteoverhang}
 \DeclareStringOption[0]{noteparstyle}
 \DeclareStringOption[black]{notelinecolor}
 \ProcessKeyvalOptions*
@@ -110,26 +110,50 @@
     \ifnum#1=1
        \let\wrap@undernote\wrap@undernote@styleA
        \let\wrap@undernote@par\wrap@undernote@par@styleA
-       \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo]}
+       \def\hline@undernote@par{%
+         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]
+      }
        \def\vlines@undernote@par{%
-          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt]%
-          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt]%
+         \mruletv[
+            height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, 
+            color=\notelinecolor@internal@undernote
+         ]%
+         \mruleth[
+            height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, 
+            color=\notelinecolor@internal@undernote
+         ]%
        }
     \else\ifnum#1=2
        \let\wrap@undernote\wrap@undernote@styleB
        \let\wrap@undernote@par\wrap@undernote@par@styleB
-       \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true]}
+       \def\hline@undernote@par{%
+         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true, color=\notelinecolor@internal@undernote]%
+      }
        \def\vlines@undernote@par{%
-          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt ,dash=true]%
-          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true]%
+         \mruletv[
+            height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, dash=true, 
+            color=\notelinecolor@internal@undernote
+         ]%
+         \mruleth[
+            height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true, 
+            color=\notelinecolor@internal@undernote
+         ]%
        }
     \else
        \let\wrap@undernote\wrap@undernote@styleC
        \let\wrap@undernote@par\wrap@undernote@par@styleC
-       \def\hline@undernote@par{\mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo]}
+       \def\hline@undernote@par{%
+         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
+      }
        \def\vlines@undernote@par{%
-          \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt]%
-          \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt]%
+         \mruletv[
+            height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt,
+            color=\notelinecolor@internal@undernote
+         ]%
+         \mruleth[
+            height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, 
+            color=\notelinecolor@internal@undernote
+         ]%
        }
     \fi\fi
   }
