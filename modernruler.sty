@@ -27,7 +27,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage
   {modernruler}
-  {2026/02/06}{Version 2.1.1}{`modernruler` provides enhanced ruler commands}
+  {2026/02/06}{Version 2.1.5}{`modernruler` provides enhanced ruler commands}
 
 %%% parameters
 \cs_if_exist:NF \zw
@@ -45,7 +45,7 @@
 
 %%% basical settings
 \RequirePackage{kvoptions, pgfkeys} 
-\RequirePackage{varwidth}
+\RequirePackage{varwidth, zref-savepos}
 \RequirePackage[most]{tcolorbox}
 %%%
 
@@ -395,12 +395,14 @@
    \stepcounter{undernote@id}%
    \ifmmode%
       \@note@save@conters%
-      \savepos%
+      % \savepos%
+      \zsavepos{unote-\the\c@undernote@id}%
       \expandafter\@math@undernote%
    \else%
       \settowidth{\undernote@textlen@tempo}{#3}%
       \leavevmode%
-      \savepos%
+      % \savepos%
+      \zsavepos{unote-\the\c@undernote@id}%
       \expandafter\@text@undernote%
    \fi%
    {#2}{#3}{%
@@ -486,24 +488,30 @@
             \notesize@internal@undernote% 
             \__modernruler_if_file_write:TF 
                {
-                  \dimen@\wd\@undernote@subtext%
-                  \advance\dimen@\notesep@internal@undernote\relax%
-                  \edef\@tempa{%
-                     % ここの書き換えは慎重に
-                     % .auxファイルから出たときにexpl3の構文が通用しない
-                     % という可能性があり、下手に書き換えを行うとまずいかも
-                     \write\@auxout{%
-                        \string\undernotedata@internal{\the\c@undernote@id}%
-                           {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
-                           {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
-                           {\noexpand\the\c@page}{\number\dp\@undernote@maintext}%
-                              % これで.auxに
-                              % \undernotedata@internal{<id>}{<xpos>}{<ypos>}{<width of the note>}%
-                              % {<height of the note>}{<depth of the note>}{<page>}{<depth of the maintext>}
-                              % が書き込まれる
-                     }%
-                  }%
-                  \@tempa%
+                  \dim_set:Nn \dimen@ {\box_wd:N \@undernote@subtext + \notesep@internal@undernote}
+                  \cs_set:Npx \l_tmpa_tl 
+                     {
+                        % ここの書き換えは慎重に：
+                        % -- .auxファイルから出たときにexpl3の構文が通用しない
+                        %    という可能性があり、下手に書き換えを行うとまずいかも
+                        % \write\@auxout{%
+                        %    \string\undernotedata@internal{\the\c@undernote@id}%
+                        %       {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
+                        %       {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
+                        %       {\noexpand\the\c@page}{\number\dp\@undernote@maintext}%
+                        \write\@auxout{%
+                           \string\undernotedata@internal{\the\c@undernote@id}%
+                              {\noexpand\zposx{unote-\the\c@undernote@id}}{\noexpand\zposy{unote-\the\c@undernote@id}}
+                              {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
+                              {\noexpand\the\c@page}{\number\dp\@undernote@maintext}%
+                                 % これで.auxに
+                                 % \undernotedata@internal
+                                 %   {<id>}{<xpos>}{<ypos>}{<width of the note>}{<height of the note>}
+                                 %   {<depth of the note>}{<page>}{<depth of the maintext>}
+                                 % が書き込まれる
+                        }
+                     }
+                  \l_tmpa_tl 
                }
                {
                   \iow_term:n { }
@@ -637,9 +645,10 @@
             }
             {
                % F のとき：範囲外なのでリストを書き出してリセット
-               \ifnum \@tempcnta > \z@
-                  \tl_put_right:Nx \@linelist { \@elt { \the\@tempcnta } { \the\@tempcntb } }
-               \fi
+               \int_compare:nNnT { \@tempcnta } > { 0 }
+                  {
+                     \tl_put_right:Nx \@linelist { \@elt { \int_use:N \@tempcnta } { \int_use:N \@tempcntb } }
+                  }
                \int_set_eq:NN \@tempcnta \count@ 
                \int_set_eq:NN \@tempcntb \count@
                \cs_set_eq:NN \@currpage \@thispage
@@ -654,13 +663,15 @@
    \@linelist%
 }
 
-\def\@UNDATA@yfuzz{3pt}
+\cs_set:cpn { @UNDATA@yfuzz } { 3pt }
 
 \def\@check@undernotedata@split#1{
-   % これどうやるんだろう
-  \expandafter\expandafter\expandafter\@check@undernotedata@split@\csname @UNDATA@\number#1\endcsname 000000\@nnil%
+   % \undernotedata@internal で作ったデータを分割
+   \expandafter\expandafter\expandafter\@check@undernotedata@split@\csname @UNDATA@\number#1\endcsname 0000000\@nnil%
+      % なんらかの理由でデータ数が不足した場合：
+      % -- 0が\@check@undernotedata@split@の引数に取り込まれる。
+      % -- 個数が足りている場合は全部第8引数に吸い込まれる。
 }
-
 \def\@check@undernotedata@split@#1#2#3#4#5#6#7#8\@nnil{
    \tl_set:Nn \@thisx { #1 }
    \tl_set:Nn \@thisy { #2 }
@@ -672,6 +683,7 @@
 }
 
 \def\@check@undernotedata@elt#1#2{%
+   % 重複判定本体
    \int_set:Nn \count@ { #2 }
    \int_add:Nn \count@ { 1 }
 
@@ -719,9 +731,9 @@
 \AtEndDocument{%
    \legacy_if:nT { @filesw }
       {
-         \write\@auxout{\string\checkundernotedata}%
+         \write\@auxout{\string\checkundernotedata}
          \cs_set_eq:NN \checkundernotedata \relax
-         \def\undernotedata@internal{\@undernotedata}%
+         \def\undernotedata@internal{\@undernotedata}
       }
 }
 %%%
