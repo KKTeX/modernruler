@@ -27,7 +27,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage
   {modernruler}
-  {2026/02/06}{Version 2.1.5}{`modernruler` provides enhanced ruler commands}
+  {2026/02/07}{Version 2.1.6}{`modernruler` provides enhanced ruler commands}
 
 %%% parameters
 \cs_if_exist:NF \zw
@@ -81,12 +81,19 @@
 \def\noterulehsize@internal@undernote{\undernote@noterulehsize}           
    % 注釈へと伸ばす横線の長さ
 \def\notesep@internal@undernote{\undernote@notesep}                        
-   % 前にある注釈が次の注釈の縦線から \notesep@internal@undernote 以内に近づくようなら，その値だけ前にある注釈を下にずらす
+   % 前にある注釈が次の注釈の縦線から \notesep@internal@undernote 以内に近づくようなら、
+   % その値だけ前にある注釈を下にずらす
 \def\noteoverhang@internal@undernote{\undernote@noteoverhang}                                 
    % どの程度後ろに注釈部分を張り出させるか
-\def\noteparstyle@internal@undernote{\undernote@noteparstyle}                                     
+\def\noteparstyle@internal@undernote{\undernote@noteparstyle}      
+\msg_new:nnn { modernruler } { invalid-number } 
+   { 
+      The~input~is~an~invalid~number. ~`noteparstyle'~must~be~`0',~`1',~or~`2'.
+   }                               
    % 注釈部分を 
-   % 1と2以外: 囲みなし 1: 実線で囲う 2:点線で囲う
+   % -- 1と2以外: 囲みなし 
+   % -- 1: 実線で囲う 
+   % -- 2:点線で囲う
 \def\notelinecolor@internal@undernote{\undernote@notelinecolor}   
    % 注釈線の色の指定
 %%%
@@ -106,60 +113,62 @@
   noteoverhang/.store~in      = \noteoverhang@internal@undernote,
   notelinecolor/.store~in     = \notelinecolor@internal@undernote,
   noteparstyle/.code          = {
-    \def\noteparstyle@internal@undernote{#1}
-    \ifnum#1=1
-       \let\wrap@undernote\wrap@undernote@styleA
-       \let\wrap@undernote@par\wrap@undernote@par@styleA
-       \def\hline@undernote@par{%
-         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]
-      }
-       \def\vlines@undernote@par{%
-         \mruletv[
-            height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, 
-            color=\notelinecolor@internal@undernote
-         ]%
-         \mruleth[
-            height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, 
-            color=\notelinecolor@internal@undernote
-         ]%
-       }
-    \else\ifnum#1=2
-       \let\wrap@undernote\wrap@undernote@styleB
-       \let\wrap@undernote@par\wrap@undernote@par@styleB
-       \def\hline@undernote@par{%
-         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true, color=\notelinecolor@internal@undernote]%
-      }
-       \def\vlines@undernote@par{%
-         \mruletv[
-            height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, dash=true, 
-            color=\notelinecolor@internal@undernote
-         ]%
-         \mruleth[
-            height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true, 
-            color=\notelinecolor@internal@undernote
-         ]%
-       }
-    \else
-       \let\wrap@undernote\wrap@undernote@styleC
-       \let\wrap@undernote@par\wrap@undernote@par@styleC
-       \def\hline@undernote@par{%
-         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
-      }
-       \def\vlines@undernote@par{%
-         \mruletv[
-            height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt,
-            color=\notelinecolor@internal@undernote
-         ]%
-         \mruleth[
-            height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, 
-            color=\notelinecolor@internal@undernote
-         ]%
-       }
-    \fi\fi
+      \def\noteparstyle@internal@undernote{#1}
+      \ifnum#1=1\relax%
+         \let\wrap@undernote\wrap@undernote@styleA
+         \let\wrap@undernote@par\wrap@undernote@par@styleA
+         \def\hline@undernote@par{%
+            \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]
+         }
+         \def\vlines@undernote@par{%
+            \mruletv[
+               height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, 
+               color=\notelinecolor@internal@undernote
+            ]%
+            \mruleth[
+               height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, 
+               color=\notelinecolor@internal@undernote
+            ]%
+         }
+      \else\ifnum#1=2\relax%
+         \let\wrap@undernote\wrap@undernote@styleB
+         \let\wrap@undernote@par\wrap@undernote@par@styleB
+         \def\hline@undernote@par{%
+            \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, dash=true, color=\notelinecolor@internal@undernote]%
+         }
+         \def\vlines@undernote@par{%
+            \mruletv[
+               height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, dash=true, 
+               color=\notelinecolor@internal@undernote
+            ]%
+            \mruleth[
+               height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true, 
+               color=\notelinecolor@internal@undernote
+            ]%
+         }
+      \else\ifnum#1=0\relax%
+         \let\wrap@undernote\wrap@undernote@styleC
+         \let\wrap@undernote@par\wrap@undernote@par@styleC
+         \def\hline@undernote@par{%
+            \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
+         }
+         \def\vlines@undernote@par{%
+            \mruletv[
+               height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt,
+               color=\notelinecolor@internal@undernote
+            ]%
+            \mruleth[
+               height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, 
+               color=\notelinecolor@internal@undernote
+            ]%
+         }
+      \else\relax%
+         \msg_warning:nn { modernruler } { invalid-number }
+      \fi\fi\fi
   }
 }
 
-\NewDocumentCommand{\SetUNote}{O{}}{%
+\NewDocumentCommand{\SetUNote}{ O{} }{%
   \pgfkeys{/KKTeX/unote, #1}%
 }
 %%%
@@ -203,7 +212,7 @@
 }
 
 % 水平方向：2色点線
-\NewDocumentCommand{\mruleth}{O{}}
+\NewDocumentCommand{\mruleth}{ O{} }
 {
    \group_begin:
    \keys_set:nn { modernrule } { #1 }
@@ -254,7 +263,7 @@
 }
 
 % 垂直方向：2色点線
-\NewDocumentCommand{\mruletv}{O{}}
+\NewDocumentCommand{\mruletv}{ O{} }
 {
    \group_begin:
    \keys_set:nn { modernrule } { #1 }
@@ -302,7 +311,7 @@
 \DeclareTotalTCBox{\FramedBox@undernote}{ O{} +m }{%
   on~line, arc=0pt,
   sharp~corners, boxsep=-.5mm+.25\zw,
-  left=.3mm, right=.3mm, top=0.3mm, bottom=0.3mm,
+  left=.3mm, right=.3mm, top=.3mm, bottom=.3mm,
   colback=white, colframe=white, boxrule=0pt,
   enhanced, before={\hspace*{.25\zw}\hspace{-.5mm}},
   borderline={\noterulethickness@internal@undernote}{-.25\zw+.5mm}{solid, \notelinecolor@internal@undernote},
@@ -311,9 +320,9 @@
 \DeclareTotalTCBox{\DashedBox@undernote}{ O{} +m }{%
   on~line, arc=0pt,
   sharp~corners, boxsep=-.5mm+.25\zw,
-  left=.3mm, right=.3mm, top=0.3mm, bottom=0.3mm,
+  left=.3mm, right=.3mm, top=.3mm, bottom=.3mm,
   colback=white, colframe=white, boxrule=0pt,
-  enhanced, before={\hspace*{.25}\hspace{-.5mm}},
+  enhanced, before={\hspace*{.25\zw}\hspace{-.5mm}},
   borderline={\noterulethickness@internal@undernote}{-.25\zw+.5mm}{dashed, \notelinecolor@internal@undernote},
   #1
 }{#2}
@@ -351,7 +360,7 @@
 \NewDocumentCommand{\wrap@undernote@styleC}{ +m }{{\NoframeBox@undernote{#1}}}
 \NewDocumentCommand{\wrap@undernote}{ +m }{{#1}}
 \NewDocumentCommand{\wrap@undernote@par}{ +m }{{\wrap@undernote@styleC{#1}}}
-\ifnum\noteparstyle@internal@undernote=1
+\ifnum\noteparstyle@internal@undernote=1\relax%
    \let\wrap@undernote\wrap@undernote@styleA
    \let\wrap@undernote@par\wrap@undernote@par@styleA
    \def\hline@undernote@par{%
@@ -361,7 +370,7 @@
       \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
       \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
    }
-\else\ifnum\noteparstyle@internal@undernote=2
+\else\ifnum\noteparstyle@internal@undernote=2\relax%
    \let\wrap@undernote\wrap@undernote@styleB
    \let\wrap@undernote@par\wrap@undernote@par@styleB
    \def\hline@undernote@par{%
@@ -371,17 +380,19 @@
       \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt ,dash=true, color=\notelinecolor@internal@undernote]%
       \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, dash=true, color=\notelinecolor@internal@undernote]%
    }
-   \else
-      \let\wrap@undernote\wrap@undernote@styleC
-      \let\wrap@undernote@par\wrap@undernote@par@styleC
-      \def\hline@undernote@par{%
-         \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
-      }%
-      \def\vlines@undernote@par{%
-         \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
-         \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
-      }
-\fi\fi
+\else\ifnum\noteparstyle@internal@undernote=0\relax%
+   \let\wrap@undernote\wrap@undernote@styleC
+   \let\wrap@undernote@par\wrap@undernote@par@styleC
+   \def\hline@undernote@par{%
+      \mruleth[height=\noterulethickness@internal@undernote, width=\undernote@textlen@tempo, color=\notelinecolor@internal@undernote]%
+   }%
+   \def\vlines@undernote@par{%
+      \mruletv[height=\dimen@, width=\noterulethickness@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
+      \mruleth[height=\noterulethickness@internal@undernote, width=\noterulehsize@internal@undernote, depth=0pt, color=\notelinecolor@internal@undernote]%
+   }
+\else\relax%
+   \msg_warning:nn { modernruler } { invalid-number }
+\fi\fi\fi
 
 \newbox\@undernote@maintext
 \newbox\@undernote@subtext
@@ -395,13 +406,11 @@
    \stepcounter{undernote@id}%
    \ifmmode%
       \@note@save@conters%
-      % \savepos%
       \zsavepos{unote-\the\c@undernote@id}%
       \expandafter\@math@undernote%
    \else%
       \settowidth{\undernote@textlen@tempo}{#3}%
       \leavevmode%
-      % \savepos%
       \zsavepos{unote-\the\c@undernote@id}%
       \expandafter\@text@undernote%
    \fi%
@@ -491,14 +500,6 @@
                   \dim_set:Nn \dimen@ {\box_wd:N \@undernote@subtext + \notesep@internal@undernote}
                   \cs_set:Npx \l_tmpa_tl 
                      {
-                        % ここの書き換えは慎重に：
-                        % -- .auxファイルから出たときにexpl3の構文が通用しない
-                        %    という可能性があり、下手に書き換えを行うとまずいかも
-                        % \write\@auxout{%
-                        %    \string\undernotedata@internal{\the\c@undernote@id}%
-                        %       {\noexpand\the\lastxpos}{\noexpand\the\lastypos}%
-                        %       {\number\dimen@}{\number\ht\@undernote@subtext}{\number\dp\@undernote@subtext}%
-                        %       {\noexpand\the\c@page}{\number\dp\@undernote@maintext}%
                         \write\@auxout{%
                            \string\undernotedata@internal{\the\c@undernote@id}%
                               {\noexpand\zposx{unote-\the\c@undernote@id}}{\noexpand\zposy{unote-\the\c@undernote@id}}
@@ -732,7 +733,7 @@
    \legacy_if:nT { @filesw }
       {
          \write\@auxout{\string\checkundernotedata}
-         \cs_set_eq:NN \checkundernotedata \relax
+         \let\checkundernotedata\relax
          \def\undernotedata@internal{\@undernotedata}
       }
 }
