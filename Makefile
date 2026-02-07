@@ -7,7 +7,8 @@ RC     = .latexmkrc
 
 
 # ----- main ------
-.PHONY: clean distclean zip doc test0 test1
+.PHONY: 
+	clean distclean zip doc test0 test1
 
 # compile
 doc:
