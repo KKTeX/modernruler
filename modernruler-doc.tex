@@ -79,7 +79,7 @@
 
 \title{\texttt{modernruler} Package Documentation}
 \author{Kosei Kawaguchi a.k.a. KKTeX}
-\date{Version 2.1.6 (2026/02/07)}
+\date{Version 2.1.7 (2026/05/18)}
 
 \begin{document}
 \begin{titlepage}
@@ -413,5 +413,12 @@ Released under the MIT License.
       \item Modernized the internal implementation by migrating from TeX primitives to the expl3 framework.
     \end{itemize}
   \item \textbf{v2.1.6 (2026/02/07)} --- Fixed a bug which occurs when \verb|noteparstyle| is set to ``2''. Also, added an error message to warn users when an invalid \verb|noteparstyle| is provided.
+  \item \textbf{v2.1.7 (2026/05/18)} --- Internal refactor with no user-facing behavior changes:
+    \begin{itemize}
+      \item Deduplicated the \verb|noteparstyle| dispatch logic, which was previously written in two places that needed to stay in sync.
+      \item Factored shared dash-rendering code between \verb|\mruleth| and \verb|\mruletv| through a common loop and segment emitters.
+      \item Unified \verb|\FramedBox| and \verb|\DashedBox| internals and extracted the shared \verb|\parbox| body used by the underlying wrap commands.
+      \item Migrated further from TeX primitives to the expl3 framework (\verb|\def| → \verb|\cs_set:Npn|, \verb|\let| → \verb|\cs_set_eq:NN|, \verb|\ifnum| → \verb|\int_case:nnF|, etc.), and removed unused declarations.
+    \end{itemize}
 \end{itemize}
 \end{document}
