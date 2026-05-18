@@ -1,31 +1,37 @@
-## OS X
+# ----- macOS -----
 .DS_Store
 .AppleDouble
 .LSOverride
 Icon
-
-## Thumbnails
 ._*
-
-## Files that might appear on external disk
 .Spotlight-V100
 .Trashes
 
-/tmp/*
-*~
-!*.pdf
-*.xbb
-*.ps
-*.dvi
-*.out
+# ----- Claude Code -----
+CLAUDE.md
+.claude/
+
+# ----- LaTeX aux files -----
 *.aux
 *.log
+*.out
+*.dvi
+*.ps
+*.xbb
 *.ltjruby
 *.synctex.*
+!*.pdf
 
+# ----- Local work -----
+/tmp/*
+*~
 extras/
-
-test[0-999].tex
-test[0-999].pdf
-
 Work/*
+
+# ----- Local test files (test0.tex–test999.tex) -----
+test[0-9].tex
+test[0-9][0-9].tex
+test[0-9][0-9][0-9].tex
+test[0-9].pdf
+test[0-9][0-9].pdf
+test[0-9][0-9][0-9].pdf
