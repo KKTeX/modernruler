@@ -203,6 +203,7 @@
 \tl_new:N   \l_mrule_gap_color_tl
 \bool_new:N \l_mrule_dash_bool
 \dim_new:N  \l__mrule_tmp_remaining_dim
+\dim_new:N  \l__mrule_segment_dim
 
 % キーの定義
 \keys_define:nn { modernrule }
@@ -246,26 +247,18 @@
    {
       \dim_while_do:nNnn { \l__mrule_tmp_remaining_dim } > { 0pt }
          {
-            \dim_compare:nNnTF { \l__mrule_tmp_remaining_dim } > { \l_mrule_dash_len_dim }
+            % メイン色: 残量と dash 長の min を出力
+            \dim_set:Nn \l__mrule_segment_dim
+               { \dim_min:nn { \l__mrule_tmp_remaining_dim } { \l_mrule_dash_len_dim } }
+            #1 { \l_mrule_color_tl } { \l__mrule_segment_dim }
+            \dim_sub:Nn \l__mrule_tmp_remaining_dim { \l__mrule_segment_dim }
+            % ギャップ色: 残量があれば、残量と gap 長の min を出力
+            \dim_compare:nNnT { \l__mrule_tmp_remaining_dim } > { 0pt }
                {
-                  % メイン色
-                  #1 { \l_mrule_color_tl } { \l_mrule_dash_len_dim }
-                  \dim_sub:Nn \l__mrule_tmp_remaining_dim { \l_mrule_dash_len_dim }
-                  % ギャップ色
-                  \dim_compare:nNnTF { \l__mrule_tmp_remaining_dim } > { \l_mrule_gap_len_dim }
-                     {
-                        #1 { \l_mrule_gap_color_tl } { \l_mrule_gap_len_dim }
-                        \dim_sub:Nn \l__mrule_tmp_remaining_dim { \l_mrule_gap_len_dim }
-                     }
-                     {
-                        #1 { \l_mrule_gap_color_tl } { \l__mrule_tmp_remaining_dim }
-                        \dim_zero:N \l__mrule_tmp_remaining_dim
-                     }
-               }
-               {
-                  % 末端: 残量分だけメイン色で埋めて終了
-                  #1 { \l_mrule_color_tl } { \l__mrule_tmp_remaining_dim }
-                  \dim_zero:N \l__mrule_tmp_remaining_dim
+                  \dim_set:Nn \l__mrule_segment_dim
+                     { \dim_min:nn { \l__mrule_tmp_remaining_dim } { \l_mrule_gap_len_dim } }
+                  #1 { \l_mrule_gap_color_tl } { \l__mrule_segment_dim }
+                  \dim_sub:Nn \l__mrule_tmp_remaining_dim { \l__mrule_segment_dim }
                }
          }
    }
@@ -414,22 +407,24 @@
   \cs_gset_eq:NN \@note@restore@counters \l_tmpa_tl
 }
 
-% 数式モードの場合への対応
-\def\@math@undernote#1#2#3{%
-   \mathchoice{%
-      \settowidth{\undernote@textlen@tempo}{\m@th$\displaystyle #2$}%
-      \@note@restore@counters\@text@undernote{#1}{\m@th$\displaystyle #2$}{#3}%
-   }{%
-      \settowidth{\undernote@textlen@tempo}{\m@th$\textstyle #2$}%
-      \@note@restore@counters\@text@undernote{#1}{\m@th$\textstyle #2$}{#3}%
-   }{%
-      \settowidth{\undernote@textlen@tempo}{\m@th$\scriptstyle #2$}%
-      \@note@restore@counters\@text@undernote{#1}{\m@th$\scriptstyle #2$}{#3}%
-   }{%
-      \settowidth{\undernote@textlen@tempo}{\m@th$\scriptscriptstyle #2$}%
-      \@note@restore@counters\@text@undernote{#1}{\m@th$\scriptscriptstyle #2$}{#3}%
-   }%
-}
+% 数式モードの場合への対応。
+% 4 つの math style ごとに、語句の幅を測ってから \@text@undernote へ流す。
+% #1: math style 切替コマンド (\displaystyle / \textstyle / \scriptstyle / \scriptscriptstyle)
+% #2: \undernote の段数引数, #3: 語句, #4: 注釈
+\cs_new_protected:Npn \__modernruler_math_one:Nnnn #1 #2 #3 #4
+   {
+      \settowidth { \undernote@textlen@tempo } { \m@th $ #1 #3 $ }
+      \@note@restore@counters
+      \@text@undernote {#2} { \m@th $ #1 #3 $ } {#4}
+   }
+\cs_set:Npn \@math@undernote #1 #2 #3
+   {
+      \mathchoice
+         { \__modernruler_math_one:Nnnn \displaystyle      {#1} {#2} {#3} }
+         { \__modernruler_math_one:Nnnn \textstyle         {#1} {#2} {#3} }
+         { \__modernruler_math_one:Nnnn \scriptstyle       {#1} {#2} {#3} }
+         { \__modernruler_math_one:Nnnn \scriptscriptstyle {#1} {#2} {#3} }
+   }
 
 % 注釈の内部実装
 \prg_new_conditional:Nnn \__modernruler_if_file_write: { p, T, F, TF }
@@ -573,7 +568,8 @@
          }
    }
 
-\def\@check@undernotedata#1#2{%  
+\cs_set:Npn \@check@undernotedata #1 #2
+{
    %%% RESET
    \tl_set:Nn \@currpage { -10000 }
    \int_set:Nn \@tempcnta { 0 }
@@ -588,24 +584,19 @@
    \int_while_do:nNnn { \count@ } < { #2 }
       {
          \int_add:Nn \count@ { 1 }
-
          \@check@undernotedata@split\count@%
 
+         % \l_tmpa_bool := 「\count@ のノートが直前と同じ行範囲に入るか」
          \bool_set_false:N \l_tmpa_bool
-
-         \int_compare:nNnTF { \@currpage } = { \@thispage }
+         \int_compare:nNnT { \@currpage } = { \@thispage }
             {
-               \dim_compare:nNnTF { \@thisy sp } < { \@tempdima }
-                  { \bool_set_false:N \l_tmpa_bool } % 範囲外（下）
+               \dim_compare:nNnF { \@thisy sp } < { \@tempdima }   % 範囲外（下）でなく
                   {
-                     \dim_compare:nNnTF { \@thisy sp } > { \@tempdimb }
-                        { \bool_set_false:N \l_tmpa_bool } % 範囲外（上）
-                        { \bool_set_true:N \l_tmpa_bool }  % 範囲内
+                     \dim_compare:nNnF { \@thisy sp } > { \@tempdimb }   % 範囲外（上）でもなければ
+                        { \bool_set_true:N \l_tmpa_bool }   % 範囲内
                   }
             }
-            { \bool_set_false:N \l_tmpa_bool } % ページが違う
 
-         % 判定結果に基づいた処理
          \bool_if:NTF \l_tmpa_bool
             {
                % T のとき：範囲内なので継続（\@tempcntb を更新）
