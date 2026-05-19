@@ -79,7 +79,7 @@
 
 \title{\texttt{modernruler} Package Documentation}
 \author{Kosei Kawaguchi a.k.a. KKTeX}
-\date{Version 2.1.7 (2026/05/18)}
+\date{Version 2.2.0 (2026/05/19)}
 
 \begin{document}
 \begin{titlepage}
@@ -419,6 +419,13 @@ Released under the MIT License.
       \item Factored shared dash-rendering code between \verb|\mruleth| and \verb|\mruletv| through a common loop and segment emitters.
       \item Unified \verb|\FramedBox| and \verb|\DashedBox| internals and extracted the shared \verb|\parbox| body used by the underlying wrap commands.
       \item Migrated further from TeX primitives to the expl3 framework (\verb|\def| → \verb|\cs_set:Npn|, \verb|\let| → \verb|\cs_set_eq:NN|, \verb|\ifnum| → \verb|\int_case:nnF|, etc.), and removed unused declarations.
+    \end{itemize}
+  \item \textbf{v2.2.0 (2026/05/19)} --- Further internal refactor with no user-facing behavior changes:
+    \begin{itemize}
+      \item Replaced primitive scratch registers (\verb|\dimen@|, \verb|\count@|, \verb|\@tempcnt[ab]|, \verb|\@tempdim[ab]|) with semantically named private \verb|\l__modernruler_*| variables.
+      \item Rewrote \verb|\undernote|, \verb|\@text@undernote|, \verb|\undernotedata@internal|, \verb|\@check@undernotedata@split[@]|, and \verb|\@check@undernotedata@elt| in expl3 style (\verb|\def| → \verb|\cs_new_protected:Npn|, \verb|\ifmmode| → \verb|\mode_if_math:TF|, \verb|\leavevmode| → \verb|\mode_leave_vertical:|, \verb|\hbox| → \verb|\hbox:n|, \verb|\vtop| → \verb|\vbox_top:n|, etc.).
+      \item Collapsed the \verb|\cs_set:Npx \l_tmpa_tl { \write\@auxout{...} } \l_tmpa_tl| idiom for \verb|.aux| writes into a single \verb|\iow_shipout:Nx|.
+      \item Converted \verb|\@UNDATA@yfuzz| into a \verb|\dim_const:Nn| constant.
     \end{itemize}
 \end{itemize}
 \end{document}
